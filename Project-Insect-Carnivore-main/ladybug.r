@@ -5,7 +5,7 @@ library(lubridate)
 rm(list = ls())
 
 
-setwd("~/Data 331/Final project/Project-Insect-Carnivore-main")
+setwd("~/Data 331/Final project/final_project/Project-Insect-Carnivore-main")
 
 #reading the ladybug data in
 ladybugs <- read.csv("data/Scan Ladybug Data.csv")
@@ -45,29 +45,34 @@ collectors$recordedBy <- gsub("m. gorsegner", "Marissa Gorsegner", collectors$re
 Augie_collectors <- collectors %>%
   dplyr::filter((recordedBy == "Veronica Cervantes") | (recordedBy == "Olivia Ruffatto") | (recordedBy == "Jack Hughes") | (recordedBy == "Marissa Gorsegner"))
 
-state_comparison <- Augie_collectors %>%
-  select(scientificName, recordedBy)
+# documentation: struggled to get rid of rows with empty records for ladybug name
+#              add comment
+collector_comparison <- Augie_collectors %>%
+  select(scientificName, recordedBy) %>%
+  dplyr::filter(scientificName != '') %>%
+  count(scientificName, recordedBy) %>%
+  dplyr::rename(ladybugsFound = n) %>%
+  dplyr::rename(Collectors = recordedBy)
 
 
+#visualization for collector_comparison dataframe
+ggplot(data = collector_comparison, aes(x = scientificName, y = ladybugsFound, fill = Collectors)) +
+  geom_col(position = position_dodge()) +
+  coord_flip() + scale_y_continuous(name="Number Found") +
+  scale_x_discrete(name="Ladybug Found") 
 
+state_comparison <- collectors %>%
+  select(scientificName, stateProvince) %>%
+  dplyr::filter(scientificName != '') %>%
+  count(scientificName, stateProvince) %>%
+  dplyr::rename(ladybugsFound = n) %>%
+  dplyr::rename(State = stateProvince)
 
-
-# everything below here is a work in progress
-barplot(state_comparison$scientificName,
-        main = 'Number of each ladybug found in IL vs IA',
-        xlab = 'Scientific Name of Ladybugs',
-        ylab = 'Total collected',
-        col = c('blue', 'red'),
-)
-legend('topright',
-       c('No', 'Yes'),
-       fill = c('blue', 'red')
-)
-
-ggplot(data = state_comparison, aes(x = Ladybug, y = Total, fill = variable)) +
-  geom_col(position = position_dodge()) 
-
-
+#visualization for state_comparison dataframe
+ggplot(data = state_comparison, aes(x = scientificName, y = ladybugsFound, fill = State)) +
+  geom_col(position = position_dodge()) +
+  coord_flip() + scale_y_continuous(name="Number Found") +
+  scale_x_discrete(name="Ladybug Found") 
 
   
   
