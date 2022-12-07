@@ -3,6 +3,7 @@ library(tidyverse)
 library(dplyr)
 library(lubridate)
 library(ggplot2)
+library(mapview)
 rm(list = ls())
 
 setwd("C:/Users/Eirik/OneDrive/College/Senior/Data 331/Github/final_project/cabbage_butterfly-main/data")
@@ -91,3 +92,33 @@ avg_size_decade <- cleaned_df %>%
 ggplot(avg_size_decade, aes(decade,avg_wing_size)) +
   geom_bar(stat="identity", position = "dodge") +
   labs(title="Average wing size by decade")
+
+#geospatial map of findings
+world <- map_data('world')
+ggplot() +
+  geom_map(
+    data = world, map = world,
+    aes(long, lat, map_id = region),
+    color = "white", fill = "lightgray", size = 0.1) +
+  geom_point(
+    data = cleaned_df,
+    aes(dwc.decimalLongitude, dwc.decimalLatitude, color = sex),
+    alpha = 0.2)
+
+
+library(leaflet)
+
+m <- leaflet() %>%
+  addTiles() %>%
+  addMarkers(lng=174.768, lat=-36.852, popup="The birthplace of R") %>%
+  setView(lng = -0.90, 40, zoom = 1)
+m  # Print the map
+
+pal = colorNumeric("RdYlBu", domain = cleaned_df$sex)
+leaflet(data = cleaned_df) |> 
+  addProviderTiles(cleaned_df$CartoDB.Positron) |>
+  addCircles(col = ~pal(sex), opacity = 0.9) |> 
+  addPolygons(data = lnd, fill = FALSE) |> 
+  addLegend(pal = pal, values = ~sex) |> 
+  setView(lng = -0.1, 51.5, zoom = 12) |> 
+  addMiniMap()
