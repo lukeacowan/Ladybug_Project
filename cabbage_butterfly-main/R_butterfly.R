@@ -5,11 +5,10 @@ library(lubridate)
 library(ggplot2)
 rm(list = ls())
 
-setwd("C:/Users/Eirik/OneDrive/College/Senior/Data 331/Github/Final Project/cabbage_butterfly-main/cabbage_butterfly-main/data")
+setwd("C:/Users/Eirik/OneDrive/College/Senior/Data 331/Github/final_project/cabbage_butterfly-main/data")
 
 complete_df <- read_excel('CompletePierisData_2022-03-09.xlsx', .name_repair = 'universal')
 cleaned_df <- read_excel('Cleaned Data LWA .xlsx', .name_repair = 'universal')
-
 
 #select necessary columns from complete_df to add to cleaned_df
 new_cols <- complete_df %>%
@@ -43,7 +42,6 @@ min_length <- min(c(cleaned_df$LW.length, cleaned_df$RW.length))
 min_width <- min(c(cleaned_df$LW.width, cleaned_df$RW.width))
 max_length <- max(c(cleaned_df$LW.length, cleaned_df$RW.length))
 max_width <- max(c(cleaned_df$LW.length, cleaned_df$RW.length))
-
 
 #pivot table to compare male and female
 comparison <- cleaned_df %>%
