@@ -24,6 +24,12 @@ cleaned_df <- cleaned_df %>%
 
 cleaned_df$LAnteriorSpotM3 <- as.numeric(cleaned_df$LAnteriorSpotM3)
 
+#change column names
+colnames(cleaned_df)[which(names(cleaned_df) == "dwc.decimalLongitude")] <- "longitude"
+colnames(cleaned_df)[which(names(cleaned_df) == "dwc.decimalLatitude")] <- "latitude"
+colnames(cleaned_df)[which(names(cleaned_df) == 'dwc.country')] <- "country"
+colnames(cleaned_df)[which(names(cleaned_df) == 'dwc.year')] <- "year"
+                           
 #two sample t-test on the left wing length vs right wing length
 t.test(cleaned_df$LW.length, cleaned_df$RW.length)  
 # p-value of .9447 shows that there is no significant difference between right and left wing length
@@ -31,7 +37,7 @@ t.test(cleaned_df$LW.length, cleaned_df$RW.length)
 #make box plots to show distribution of wing size - t-test shows no significant difference between
 # wings so only plot left wing
 wing_length <- ggplot(cleaned_df, aes(sex, LW.length))
-wing_length + geom_boxplot()
+wing_length + geom_boxplot() + ylab('wing length') + labs(title = 'Wing Size by Sex')
 #female butterflies have larger wings than male butterflies
 
 #overall statistics for wing length and width
@@ -57,8 +63,8 @@ comparison <- cleaned_df %>%
 
 #comparison to show how location affects size
 location <- cleaned_df %>%
-  select(dwc.country, LW.length, LW.apex.A, LAnteriorSpotM3) %>%
-  group_by(dwc.country) %>%
+  select(country, LW.length, LW.apex.A, LAnteriorSpotM3) %>%
+  group_by(country) %>%
   summarise(mean_wing_length = mean(LW.length),
             mean_apex = mean(LW.apex.A),
             mean_spot = mean(LAnteriorSpotM3),
@@ -67,23 +73,25 @@ location <- cleaned_df %>%
             max_spot = max(LAnteriorSpotM3))
 
 #box plot to show how location affects size
-size_country <- ggplot(cleaned_df, aes(dwc.country, LW.length))
-size_country + geom_boxplot()
+size_country <- ggplot(cleaned_df, aes(country, LW.length))
+size_country + geom_boxplot() + ylab('wing length') + labs(title = 'Wing Size by Country')
 
 #average size by year
 avg_size_year <- cleaned_df %>%
-  group_by(dwc.year) %>%
+  group_by(year) %>%
   summarise(avg_wing_size = mean(LW.length),
             avg_spot = mean(LAnteriorSpotM3),
             avg_apex = mean(LW.apex.A))
 
 barplot(avg_size_year$avg_wing_size,
-        names.arg = avg_size_year$dwc.year,
-        ylim = c(0,30))
+        names.arg = avg_size_year$year,
+        ylim = c(0,30),
+        main = "Wing Size by Year",
+        xlab = 'year', ylab = 'wing size')
 
 #average size by decade
 avg_size_decade <- cleaned_df %>%
-  mutate(decade = as.numeric(dwc.year) - as.numeric(dwc.year) %% 10) %>%
+  mutate(decade = as.numeric(year) - as.numeric(year) %% 10) %>%
   group_by(decade) %>%
   summarise(avg_wing_size = mean(LW.length),
             avg_spot = mean(LAnteriorSpotM3),
@@ -91,30 +99,13 @@ avg_size_decade <- cleaned_df %>%
 
 ggplot(avg_size_decade, aes(decade,avg_wing_size)) +
   geom_bar(stat="identity", position = "dodge") +
-  labs(title="Average wing size by decade")
+  labs(title="Average wing size by decade") +
+  ylab('wing length')
 
 #geospatial map of findings
-
-#world <- map_data('world')
-#ggplot() +
-#  geom_map(
-#    data = world, map = world,
-#    aes(long, lat, map_id = region),
-#    color = "white", fill = "lightgray", size = 0.1) +
-#  geom_point(
-#    data = cleaned_df,
-#    aes(dwc.decimalLongitude, dwc.decimalLatitude, color = sex),
-#    alpha = 0.2)
-
-qpal <- colorQuantile('reds', cleaned_df$LW.length)
-pal <- colorBin('rainbow(4)', cleaned_df$LW.length, pretty = FALSE, bins = 4)
-pal
-
 m <- leaflet() %>%
   addTiles() %>%
-  #addCircleMarkers(lng=cleaned_df$dwc.decimalLongitude, lat=cleaned_df$dwc.decimalLatitude)
   addCircleMarkers(
-    data = cleaned_df,
-    lng=cleaned_df$dwc.decimalLongitude, lat=cleaned_df$dwc.decimalLatitude,
-    color = ~pal(cleaned_df$LW.length))
+    lng=cleaned_df$longitude, lat=cleaned_df$latitude,
+    color = 'green', radius = 5)
 m  # Print the map
