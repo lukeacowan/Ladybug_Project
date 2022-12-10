@@ -7,7 +7,7 @@ rm(list = ls())
 #documentation: struggled to get rid of rows with empty records for ladybug name
 #struggled with creating time series analysis
 
-setwd("~/Data 331/Final project/final_project/Project-Insect-Carnivore-main")
+setwd("~/Data 331/Final project/Ladybug_Project/Project-Insect-Carnivore-main")
 
 #reading both ladybug data sets in
 df_ladybug <- read_excel("data/Ladybug Data.xlsx", .name_repair = "universal")
