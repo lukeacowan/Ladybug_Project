@@ -77,10 +77,10 @@ location_found$Species <- gsub("Cycloneda Munda", "Cycloneda munda", location_fo
 location_found$Species <- gsub("cycloneda munda", "Cycloneda munda", location_found$Species)
 location_found$Species <- gsub("coleomegilla maculata", "Coleomegilla maculata", location_found$Species)
 location_found$Species <- gsub("Colemegilla maculata", "Coleomegilla maculata", location_found$Species)
-location_found$Species <- gsub("Coccinella Septempunctata", "Coccinella septemunctata", location_found$Species)
-location_found$Species <- gsub("coccinella septempunctata", "Coccinella septemunctata", location_found$Species)
-location_found$Species <- gsub("Coccinella semtempuncata", "Coccinella septemunctata", location_found$Species)
-location_found$Species <- gsub("Coccinella septempunctata", "Coccinella septemunctata", location_found$Species)
+location_found$Species <- gsub("Coccinella Septempunctata", "Coccinella septempunctata", location_found$Species)
+location_found$Species <- gsub("coccinella septempunctata", "Coccinella septempunctata", location_found$Species)
+location_found$Species <- gsub("Coccinella semtempuncata", "Coccinella septempunctata", location_found$Species)
+location_found$Species <- gsub("Coccinella septempunctata", "Coccinella septempunctata", location_found$Species)
 
 #finding total of species collected for each location
 location_amount <- location_found %>%
