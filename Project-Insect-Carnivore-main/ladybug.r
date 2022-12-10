@@ -4,20 +4,28 @@ library(dplyr)
 library(lubridate)
 rm(list = ls())
 
+#documentation: struggled to get rid of rows with empty records for ladybug name
+#struggled with creating time series analysis
 
 setwd("~/Data 331/Final project/final_project/Project-Insect-Carnivore-main")
 
-#reading the ladybug data in
-ladybug_condensed <- read_excel("data/Ladybug Data.xlsx", .name_repair = "universal")
-ladybugs <- read.csv("data/Scan Ladybug Data.csv")
+#reading both ladybug data sets in
+df_ladybug <- read_excel("data/Ladybug Data.xlsx", .name_repair = "universal")
+df_scan_ladybug <- read.csv("data/Scan Ladybug Data.csv")
 
-found_ladybug <- ladybug_condensed %>%
-  dplyr::filter(Species != 'UNKNOWN') %>% 
+#renaming column names for clarity and joining the data sets
+joined_df <- df_scan_ladybug %>%
+  dplyr::rename("SCAN.CODE" = "catalogNumber") %>%
+  left_join(df_ladybug, by = c("SCAN.CODE")) %>% 
+  dplyr::rename("scanCode" = "SCAN.CODE") %>%
   dplyr::rename(Location = plot)
 
-location_found <- found_ladybug %>%
-  select(Species, Location)
+#dplyr::selecting only the data for the ladybugs collected by the Augustana students
+location_found <- joined_df %>%
+  dplyr::filter(Species != 'UNKNOWN') %>%
+  dplyr::select(Species, Location)
 
+#switching the plot names to show the type of area the ladybugs were collected in  
 location_found$Location <- gsub("LP-AG-1", "Agriculture", location_found$Location)  
 location_found$Location <- gsub("LP-AG-2", "Agriculture", location_found$Location) 
 location_found$Location <- gsub("LP-AG-3", "Agriculture", location_found$Location) 
@@ -55,6 +63,7 @@ location_found$Location <- gsub("LP-GF-3", "Forested", location_found$Location)
 location_found$Location <- gsub("LP-GF-4", "Forested", location_found$Location)
 location_found$Location <- gsub("LP-GF-5", "Forested", location_found$Location)
 
+#cleaning species names to eliminate inconsistent spellings
 location_found$Species <- gsub("Propylea quatuordecimpuncata", "Propylea quatuordecimpunctata", location_found$Species)
 location_found$Species <- gsub("hippodamia parenthesis", "Hippodamia parenthesis", location_found$Species)
 location_found$Species <- gsub("hippodamia convergens", "Hippodamia convergens", location_found$Species)
@@ -73,38 +82,36 @@ location_found$Species <- gsub("coccinella septempunctata", "Coccinella septemun
 location_found$Species <- gsub("Coccinella semtempuncata", "Coccinella septemunctata", location_found$Species)
 location_found$Species <- gsub("Coccinella septempunctata", "Coccinella septemunctata", location_found$Species)
 
+#finding total of species collected for each location
+location_amount <- location_found %>%
+  count(Species, Location) %>%
+  dplyr::rename(ladybugsFound = n)
 
+#location visualization
+ggplot(data = location_amount, aes(x = Species, y = ladybugsFound, fill = Location)) +
+  geom_col(position = position_stack()) +
+  coord_flip() + scale_y_continuous(name="Ladybugs Found") +
+  scale_x_discrete(name="Species") +
+  ggtitle("Number of Ladybugs Found in Each Location by Species") 
 
+#filtering for ladybugs collected in Illinois and Iowa only
+ladybug_states <- df_scan_ladybug %>%
+  dplyr::filter((stateProvince == "Illinois") | (stateProvince == "Iowa")) %>%
+  dplyr::select(scientificName, stateProvince) %>%
+  dplyr::filter(scientificName != '') %>%
+  count(scientificName, stateProvince) %>%
+  dplyr::rename(ladybugsFound = n) %>%
+  dplyr::rename(State = stateProvince)
 
+#state visualization
+ggplot(data = ladybug_states, aes(x = scientificName, y = ladybugsFound, fill = State)) +
+  geom_col(position = position_stack()) +
+  coord_flip() + scale_y_continuous(name="Ladybugs Found") +
+  scale_x_discrete(name="Species") +
+  ggtitle("Number of Ladybugs Found in IL and IA by Species") 
 
-
-
-
-ggplot(data = location_found, aes(x = Species, y = Location)) +
-  geom_col(position = position_dodge()) +
-  coord_flip() + scale_y_continuous(name="Number Found") +
-  #scale_x_discrete(name="Ladybug Found") 
-
-
-
-
-
-
-
-
-#copy of initial dataframe to be used for consistent formatting of state names
-ladybugs_states <- ladybugs
-
-#formatting states for consistency
-ladybugs_states$stateProvince <- gsub("IL", "Illinois", ladybugs_states$stateProvince)
-ladybugs_states$stateProvince <- gsub("IA", "Iowa", ladybugs_states$stateProvince)
-
-#filtering for ladybugs collected in Iowa and Illinois only
-state_collected <- ladybugs_states %>%
-  dplyr::filter((stateProvince == "Illinois") | (stateProvince == "Iowa"))
-
-#copy of dataframe above to be used for consistent formatting of collector names
-collectors <- state_collected
+#copy of joined dataframe to be used for consistent formatting of collector names
+collectors <- joined_df
 
 #formatting collector names for consistency
 collectors$recordedBy <- gsub("V. Cervantes", "Veronica Cervantes", collectors$recordedBy)
@@ -123,47 +130,74 @@ collectors$recordedBy <- gsub("m. Gorsegner", "Marissa Gorsegner", collectors$re
 collectors$recordedBy <- gsub("Gorsegner M.", "Marissa Gorsegner", collectors$recordedBy)
 collectors$recordedBy <- gsub("m. gorsegner", "Marissa Gorsegner", collectors$recordedBy)
 
-#filtering for ladybugs recorded in 2021 only
-Augie_collectors <- collectors %>%
-  dplyr::filter((recordedBy == "Veronica Cervantes") | (recordedBy == "Olivia Ruffatto") | (recordedBy == "Jack Hughes") | (recordedBy == "Marissa Gorsegner"))
-
-# documentation: struggled to get rid of rows with empty records for ladybug name
-#              add comment
-collector_comparison <- Augie_collectors %>%
-  select(scientificName, recordedBy) %>%
+#identifying and summing ladybugs recorded by each Augie student individually
+augie_collectors <- collectors %>%
+  dplyr::filter((recordedBy == "Veronica Cervantes") | (recordedBy == "Olivia Ruffatto") | (recordedBy == "Jack Hughes") | (recordedBy == "Marissa Gorsegner")) %>%
+  dplyr::select(scientificName, recordedBy) %>%
   dplyr::filter(scientificName != '') %>%
   count(scientificName, recordedBy) %>%
   dplyr::rename(ladybugsFound = n) %>%
   dplyr::rename(Collectors = recordedBy)
 
+#fixing incorrect notation of ladybug name for consistency 
+augie_collectors$scientificName <- gsub("harmonia axyridis", "Harmonia axyridis", augie_collectors$scientificName)  
 
-#visualization for collector_comparison dataframe
-ggplot(data = collector_comparison, aes(x = scientificName, y = ladybugsFound, fill = Collectors)) +
+#Augie collector visualization
+ggplot(data = augie_collectors, aes(x = scientificName, y = ladybugsFound, fill = Collectors)) +
   geom_col(position = position_dodge()) +
-  coord_flip() + scale_y_continuous(name="Number Found") +
-  scale_x_discrete(name="Ladybug Found") 
-
-state_comparison <- collectors %>%
-  select(scientificName, stateProvince) %>%
-  dplyr::filter(scientificName != '') %>%
-  count(scientificName, stateProvince) %>%
-  dplyr::rename(ladybugsFound = n) %>%
-  dplyr::rename(State = stateProvince)
-
-#visualization for state_comparison dataframe
-ggplot(data = state_comparison, aes(x = scientificName, y = ladybugsFound, fill = State)) +
-  geom_col(position = position_dodge()) +
-  coord_flip() + scale_y_continuous(name="Number Found") +
-  scale_x_discrete(name="Ladybug Found") 
-
+  coord_flip() + scale_y_continuous(name="Ladybugs Found") +
+  scale_x_discrete(name="Species") +
+  ggtitle("Number of Ladybugs Found by Collectors for Each Species")
   
-  
-  
-  
+#filtering for six of the most commonly found species of ladybugs since 1960s
+ladybug_decade <- df_scan_ladybug %>%
+  dplyr::select(scientificName, year) %>%
+  dplyr::filter((scientificName == "Cycloneda sanguinea") | (scientificName == "Chilocorus stigma") | (scientificName == "Coccinella septempunctata") | (scientificName == "Coleomegilla maculata") | (scientificName == "Hippodamia convergens") | (scientificName == "Harmonia axyridis")) 
+
+#adding a decade column that corresponds with year to enable grouping by decade
+ladybug_decade$decade <- substr(ladybug_decade$year, 1, 3)
+ladybug_decade$decade <- paste0(ladybug_decade$decade, "0s")
+
+#summing the ladybugs found in each decade and their proportion relative to the total number of ladybugs found 
+ladybug_by_decade <- ladybug_decade %>%
+  dplyr::group_by(decade, scientificName) %>%
+  dplyr::filter(decade != "NA0s") %>%
+  dplyr::summarise(ladybugsFound = n()) %>%
+  mutate(percentage = ladybugsFound / sum(ladybugsFound))
+
+#creating a data frame to prevent discontinuity in the line graph below due to decades where certain ladybugs were not collected
+filler_data = data.frame(decade=c("1960s","1960s", "1960s", "1970s", "1970s", "1980s", "1990s", "2000s", "2000s", "2000s", "2010s", "2010s", "2010s", "2010s", "2020s", "2030s", "2030s", "2030s", "2030s", "2030s", "2030s"), scientificName=c("Chilocorus stigma", "Coccinella septempunctata", "Harmonia axyridis", "Coccinella septempunctata", "Harmonia axyridis", "Harmonia axyridis", "Harmonia axyridis", "Chilocorus stigma", "Hippodamia convergens", "Harmonia axyridis", "Cycloneda sanguinea", "Chilocorus stigma", "Hippodamia convergens", "Harmonia axyridis", "Cycloneda sanguinea", "Cycloneda sanguinea", "Chilocorus stigma", "Coccinella septempunctata", "Coleomegilla maculata", "Hippodamia convergens", "Harmonia axyridis"), ladybugsFound=c(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0), percentage=c(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0))
+ladybug_by_decade <- rbind(ladybug_by_decade, filler_data)
+
+#    Talk about how sample sizes in decades leading up to 2020 do not offer a complete picture due to the lack of ladybugs recorded
+#    Totals: 1960s - 12; 1970s - 27; 1980s - 35; 1990s - 22; 2000s - 3; 2010s - 3
+#    Mention how the most common types throughout these decades were selected -- did not include all distinct ladybugs
+
+#ladybug proportion by decade visualization
+ggplot(ladybug_by_decade, aes(x = decade, y = percentage, group = scientificName))+
+  geom_line(aes(colour=scientificName), lwd=1.0) + 
+  xlab("Decade") + 
+  ylab("Proportion of Total Ladybugs Found") + 
+  ggtitle("Proportion of Ladybugs Found by Decade") 
+
+#finding count of each epithet
+ladybug_epithet <- joined_df %>%
+  dplyr::filter(Species != 'UNKNOWN') %>%
+  dplyr::select(specificEpithet) %>%
+  dplyr::filter(specificEpithet != '') %>%
+  count(specificEpithet) %>%
+  dplyr::rename(ladybugsFound = n) 
+
+#performing one-sample t-test for the mean number of ladybugs per epithet
+t.test(ladybug_epithet$ladybugsFound, mu=40)
 
 
 
 
 
-  
+
+
+
+
+
 
