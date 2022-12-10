@@ -80,7 +80,6 @@ location_found$Species <- gsub("Colemegilla maculata", "Coleomegilla maculata", 
 location_found$Species <- gsub("Coccinella Septempunctata", "Coccinella septempunctata", location_found$Species)
 location_found$Species <- gsub("coccinella septempunctata", "Coccinella septempunctata", location_found$Species)
 location_found$Species <- gsub("Coccinella semtempuncata", "Coccinella septempunctata", location_found$Species)
-location_found$Species <- gsub("Coccinella septempunctata", "Coccinella septempunctata", location_found$Species)
 
 #finding total of species collected for each location
 location_amount <- location_found %>%
@@ -102,6 +101,9 @@ ladybug_states <- df_scan_ladybug %>%
   count(scientificName, stateProvince) %>%
   dplyr::rename(ladybugsFound = n) %>%
   dplyr::rename(State = stateProvince)
+
+#fixing incorrect notation of ladybug name for consistency 
+ladybug_states$scientificName <- gsub("harmonia axyridis", "Harmonia axyridis", ladybug_states$scientificName)  
 
 #state visualization
 ggplot(data = ladybug_states, aes(x = scientificName, y = ladybugsFound, fill = State)) +
