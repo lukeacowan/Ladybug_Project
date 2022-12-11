@@ -93,20 +93,25 @@ ggplot(data = location_amount, aes(x = Species, y = ladybugsFound, fill = Locati
   scale_x_discrete(name="Species") +
   ggtitle("Number of Ladybugs Found in Each Location by Species") 
 
-#filtering for ladybugs collected in Illinois and Iowa only
+#finding total of species collected in each state
 ladybug_states <- df_scan_ladybug %>%
-  dplyr::filter((stateProvince == "Illinois") | (stateProvince == "Iowa")) %>%
   dplyr::select(scientificName, stateProvince) %>%
   dplyr::filter(scientificName != '') %>%
   count(scientificName, stateProvince) %>%
   dplyr::rename(ladybugsFound = n) %>%
   dplyr::rename(State = stateProvince)
 
-#fixing incorrect notation of ladybug name for consistency 
-ladybug_states$scientificName <- gsub("harmonia axyridis", "Harmonia axyridis", ladybug_states$scientificName)  
+#fixing incorrect notation of ladybug and state names
+ladybug_states$scientificName <- gsub("harmonia axyridis", "Harmonia axyridis", ladybug_states$scientificName)
+ladybug_states$State <- gsub("IL", "Illinois", ladybug_states$State)
+ladybug_states$State <- gsub("IA", "Iowa", ladybug_states$State)
+
+#filtering for ladybugs collected in Illinois and Iowa only
+corrected_states <- ladybug_states %>%
+  dplyr::filter((State == "Illinois") | (State == "Iowa"))
 
 #state visualization
-ggplot(data = ladybug_states, aes(x = scientificName, y = ladybugsFound, fill = State)) +
+ggplot(data = corrected_states, aes(x = scientificName, y = ladybugsFound, fill = State)) +
   geom_col(position = position_stack()) +
   coord_flip() + scale_y_continuous(name="Ladybugs Found") +
   scale_x_discrete(name="Species") +
