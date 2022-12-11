@@ -14,7 +14,7 @@ The columns that we used include:
 - specificEpithet: the specific species within a genus that makes up the second portion of the scientific name of the ladybug
 
 The columns we created include: 
-- ladyBugsFound: the number of ladybugs found
+- ladybugsFound: the number of ladybugs found
 - decade: the decade in which the sample was recorded
 - percentage: the proportion of a ladybug species relative to the entire collection sample for a given decade
 ---
@@ -61,7 +61,14 @@ augie_collectors$scientificName <- gsub("harmonia axyridis", "Harmonia axyridis"
 ```
 - Code shown above was used in two separate data frames
 
-4. Cleaned the recordedBy column 
+4. Changed state abbreviation values to full state name
+- "IL" and "IA" appeared frequently in the original data
+```
+ladybug_states$State <- gsub("IL", "Illinois", ladybug_states$State)
+ladybug_states$State <- gsub("IA", "Iowa", ladybug_states$State)
+```
+
+5. Cleaned the recordedBy column 
 - Format and capitilization of collectors' first and last names were inconsistent
 - Changed them to include their capitalized first and last names
 ```
@@ -82,10 +89,10 @@ collectors$recordedBy <- gsub("Gorsegner M.", "Marissa Gorsegner", collectors$re
 collectors$recordedBy <- gsub("m. gorsegner", "Marissa Gorsegner", collectors$recordedBy)
 ```
 
-5. Renamed column names when needed or desired
+6. Renamed column names when needed or desired
 - Frequently used dplyr::rename() function
 
-6. Omitted missing/NA values
+7. Omitted missing/NA values
 ```
 dplyr::filter(Species != 'UNKNOWN')
 dplyr::filter(scientificName != '')
@@ -108,23 +115,26 @@ After filtering out NA values, we selected the species and location columns and 
 - As shown in the graph, Harmonia axyridis and Coleomegilla maculata were the most commonly found ladybugs among the four Augustana students, being found in (nearly) all possible locations. 
 - It is interesting to see that although quite a few ladybugs of the Brachiancantha ursina species were collected, they were only found in forested regions. 
 - The greatest number of ladybugs were found in unmowed grass areas.
-- We found this graph to be insightful because it illustrates that Harmonia axyridis ladybugs were the most commonly found species in almost half of the regions, along with the largest total overall. This is particularly interesting because this species is not native nor has it beeen around as long as other species, a topic which will be discussed in more depth later on.
+- We found this graph to be insightful because it illustrates that Harmonia axyridis ladybugs were the most commonly found species in almost half of the regions, along with the largest total overall. This is particularly interesting because this species is not native to the United States nor has it beeen around as long as other species, a topic which will be discussed in more depth later on.
 
 2. What state were most of the ladybugs found in?
-- To enable comparison of the number of ladybugs found in Illinois versus Iowa, we used the following code:
+- To enable comparison of the number of ladybugs found in Illinois versus Iowa (the only states with a significant number of ladybugs collected), we used the following code:
 ```
 ladybug_states <- df_scan_ladybug %>%
-  dplyr::filter((stateProvince == "Illinois") | (stateProvince == "Iowa")) %>%
   dplyr::select(scientificName, stateProvince) %>%
   dplyr::filter(scientificName != '') %>%
   count(scientificName, stateProvince) %>%
+  
+corrected_states <- ladybug_states %>%
+  dplyr::filter((State == "Illinois") | (State == "Iowa"))
 ```
 Our visualization for this data is shown below:
 
 <img src="Project-Insect-Carnivore-main/State Visualization.png"> <br>
-- This graph shows that the majority of the 407 ladybugs found (~62%) according to the parameters specified in the code were collected in Scott County, Iowa.
-- The total number of Brachiacantha ursina found is nearly identical to the last visualization, which led us to conclude that ladybugs found in forested regions were almost entirely found in Iowa as opposed to Illinois.
-- Once again, Harmonia axyridis is shown to be the most dominant species in terms of the number found.
+- This graph shows that the majority of the 611 ladybugs found (~53%), according to the parameters specified in the code, were collected in Iowa. The majority of these collections occurred in Scott County.
+- The total number of Brachiacantha ursina found in Iowa is nearly identical to the total number found in 2021 from the last visualization, which led us to conclude that ladybugs of this species found in forested regions in 2021 were almost exclusively found in Iowa as opposed to Illinois.
+- Coleomegilla maculata is shown to be the most dominant species in terms of the number found in this visualization. This is a different result from the last visualization because this analysis was not controlled for only ladybugs collected in 2021.
+- This provides us with further insight regarding how Harmonia axyridis ladybugs only migrated and increased their numbers within this region in the last couple decades. Coleomegilla maculata ladybugs are native to the United States, so the deficit between the total number of axyridis and maculata ladybugs collected is the result of the maculata variant being available for collection for a longer portion of this ladybug collection project. 
 
 3. Did each member of the Augustana Biology department collect a similar number of each type of ladybug?
 - After cleaning the joined data frame to avoid repeats due to inconsistent formatting, we used the following code to identify how many ladybugs the members of the Augustana Biology department collected from each species.
@@ -151,6 +161,7 @@ Each collector found (almost) all of the listed ladybug species and there was ty
 ``` 
 ladybug_decade$decade <- substr(ladybug_decade$year, 1, 3)
 ladybug_decade$decade <- paste0(ladybug_decade$decade, "0s")
+
 ladybug_by_decade <- ladybug_decade %>%
   dplyr::group_by(decade, scientificName) %>%
   dplyr::filter(decade != "NA0s") %>%
@@ -180,7 +191,7 @@ However, we found this graph insightful because it shows how rapidly the Harmoni
 The reduced proportion of native ladybug species relative to the entire sample set, not including Coleomegilla maculata, led us to conclude that Harmonia axyridis ladybugs are outcompeting the other species for food and resources. <br/>
 <br>
 
-5. What was the average number of ladybus found per specific epithet? 
+5. What was the average number of ladybugs found per specific epithet? 
 - The code used prior to conducting the t-test was written as follows:
 ```
 ladybug_epithet <- joined_df %>%
@@ -198,10 +209,10 @@ The results of our t-test are shown below:
 ---
 
 ## Conclusion :lady_beetle:
-1. Harmonia axyridis have overtaken Coleomegilla maculata as the most dominant species of ladybug near Augustana College in recent years.
-2. More ladybugs live/can be found in unmowed grass habitats than other areas, i.e., agricultural, garden, industrial, etc.
-3. The greatest number of ladybug samples were collected in Scott County, Iowa.
-4. All members of the Augustana Biology department collected a large and diverse sample of ladybugs in 2021.
+1. More ladybugs live/can be found in unmowed grass habitats than other areas, i.e., agricultural, garden, industrial, etc.
+2. The majority of the ladybug samples were collected in Iowa (specifically Scott County).
+3. All members of the Augustana Biology department collected a large and diverse sample of ladybugs in 2021.
+4. Harmonia axyridis have overtaken Coleomegilla maculata as the most dominant species of ladybug near Augustana College in recent years.
 5. Harmonia axyridis ladybugs are outcompeting other ladybug species for food and resources.
 
 
