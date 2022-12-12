@@ -115,7 +115,7 @@ After filtering out NA values, we selected the species and location columns and 
 - As shown in the graph, Harmonia axyridis and Coleomegilla maculata were the most commonly found ladybugs among the four Augustana students, being found in (nearly) all possible locations. 
 - It is interesting to see that although quite a few ladybugs of the Brachiancantha ursina species were collected, they were only found in forested regions. 
 - The greatest number of ladybugs were found in unmowed grass areas.
-- We found this graph to be insightful because it illustrates that Harmonia axyridis ladybugs were the most commonly found species in almost half of the regions, along with the largest total overall. This is particularly interesting because this species is not native to the United States nor has it beeen around as long as other species, a topic which will be discussed in more depth later on.
+- We found this graph to be insightful because it illustrates that Harmonia axyridis ladybugs were the most commonly found species in almost half of the regions, along with the largest total overall. This is particularly interesting because this species is not native to the United States nor has it been around as long as other species, a topic which will be discussed in more depth later on.
 
 2. What state were most of the ladybugs found in?
 - To enable comparison of the number of ladybugs found in Illinois versus Iowa (the only states with a significant number of ladybugs collected), we used the following code:
