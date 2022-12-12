@@ -184,7 +184,7 @@ The total number of ladybugs collected in each decade is as follows:
 <br>
 The sample sizes in the decades leading up to the 2020s--the 2000s and 2010s especially--are not substantial enough to    draw solid conclusions. <br/>
 <br>
-Values shown on the line chart for the 2000s and 2010s are not represenative of the actual distribution of species for the reason listed above, so those dramatic shifts in trends should be ignored. <br/>
+Values shown on the line chart for the 2000s and 2010s are not representative of the actual distribution of species for the reason listed above, so those dramatic shifts in trends should be ignored. <br/>
 <br>
 However, we found this graph insightful because it shows how rapidly the Harmonia axyridis grew to be the most dominant species on the Illinois-Iowa border. We believe this trend began during the 2000s and/or the 2010s, but there was not enough data to substantiate or deny this hypothesis. <br/>
 <br>
