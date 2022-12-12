@@ -1,11 +1,10 @@
+#DATA 331 Ladybug Code
 library(readxl)
 library(tidyverse)
 library(dplyr)
 library(lubridate)
 rm(list = ls())
 
-#documentation: struggled to get rid of rows with empty records for ladybug name
-#struggled with creating time series analysis
 
 setwd("~/Data 331/Final project/Ladybug_Project/Project-Insect-Carnivore-main")
 
@@ -175,10 +174,6 @@ ladybug_by_decade <- ladybug_decade %>%
 #creating a data frame to prevent discontinuity in the line graph below due to decades where certain ladybugs were not collected
 filler_data = data.frame(decade=c("1960s","1960s", "1960s", "1970s", "1970s", "1980s", "1990s", "2000s", "2000s", "2000s", "2010s", "2010s", "2010s", "2010s", "2020s"), scientificName=c("Chilocorus stigma", "Coccinella septempunctata", "Harmonia axyridis", "Coccinella septempunctata", "Harmonia axyridis", "Harmonia axyridis", "Harmonia axyridis", "Chilocorus stigma", "Hippodamia convergens", "Harmonia axyridis", "Cycloneda sanguinea", "Chilocorus stigma", "Hippodamia convergens", "Harmonia axyridis", "Cycloneda sanguinea"), ladybugsFound=c(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0), percentage=c(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0))
 ladybug_by_decade <- rbind(ladybug_by_decade, filler_data)
-
-#    Talk about how sample sizes in decades leading up to 2020 do not offer a complete picture due to the lack of ladybugs recorded
-#    Totals: 1960s - 12; 1970s - 27; 1980s - 35; 1990s - 22; 2000s - 3; 2010s - 3; 2020s - 294
-#    Mention how the most common types throughout these decades were selected -- did not include all distinct ladybugs
 
 #ladybug proportion by decade visualization
 ggplot(ladybug_by_decade, aes(x = decade, y = percentage, group = scientificName))+
